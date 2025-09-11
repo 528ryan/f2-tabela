@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeonato F2 2025</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <style>
+        /* Pequenos ajustes para complementar o Bootstrap */
+        body {
+            background-color: #212529;
+        }
+        .table {
+            --bs-table-bg: #343a40;
+            --bs-table-border-color: #495057;
+        }
+        .table-hover > tbody > tr:hover > * {
+            --bs-table-hover-bg: #495057;
+        }
+        .card {
+             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container my-4">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold">Campeonato de Fórmula 2 - 2025</h1>
+            <p class="text-muted">Gerencie os pilotos e os resultados de cada etapa.</p>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Gerenciar Pilotos</h2>
+            </div>
+            <div class="card-body">
+                <div class="input-group mb-3">
+                    <input type="text" id="driverNameInput" class="form-control" placeholder="Nome do Piloto">
+                    <button id="addDriverBtn" class="btn btn-primary">Adicionar Piloto</button>
+                </div>
+                <ul id="driverList" class="list-group"></ul>
+                <button id="resetChampionshipBtn" class="btn btn-danger mt-3">Resetar Campeonato</button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Resultados da Corrida</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="raceSelector" class="form-label">Selecione a Corrida:</label>
+                    <select id="raceSelector" class="form-select"></select>
+                </div>
+                <div id="race-table-container" class="table-responsive"></div>
+                <button id="saveResultsBtn" class="btn btn-success mt-3" style="display: none;">Salvar Resultados</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Tabela Geral de Pontos</h2>
+            </div>
+            <div class="card-body">
+                <div id="standings-table-container" class="table-responsive"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyCnUImiz-OLoI6T3YkFk-yXOAFXPeUANfw",
+                authDomain: "f2-campeonato.firebaseapp.com",
+                projectId: "f2-campeonato",
+                storageBucket: "f2-campeonato.firebasestorage.app",
+                messagingSenderId: "667581747059",
+                appId: "1:667581747059:web:54ccd5254353e5bccfff06",
+                measurementId: "G-9S30PKEYSJ"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            const races = [
+                "10/09 – Austrália (Melbourne)", "17/09 – França (Paul Ricard)", "24/09 – Áustria (Red Bull Ring)",
+                "01/10 – Canadá (Montreal)", "08/10 – Grã-Bretanha (Silverstone)", "15/10 – Hungria (Hungaroring)",
+                "22/10 – Itália (Monza)", "29/10 – Bélgica (Spa)", "05/11 – Azerbaijão (Baku)",
+                "12/11 – Singapura (Marina Bay)", "19/11 – Rússia (Sochi)", "26/11 – México (Hermanos Rodríguez)",
+                "03/12 – Mônaco", "10/12 – Brasil (Interlagos)", "17/12 – Abu Dhabi (Yas Marina)"
+            ];
+            const points = {
+                sprint: [10, 8, 6, 5, 4, 3, 2, 1],
+                feature: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+            };
+
+            const driverNameInput = document.getElementById('driverNameInput');
+            const addDriverBtn = document.getElementById('addDriverBtn');
+            const driverList = document.getElementById('driverList');
+            const resetChampionshipBtn = document.getElementById('resetChampionshipBtn');
+            const raceSelector = document.getElementById('raceSelector');
+            const raceTableContainer = document.getElementById('race-table-container');
+            const saveResultsBtn = document.getElementById('saveResultsBtn');
+            const standingsTableContainer = document.getElementById('standings-table-container');
+
+            let state = {
+                drivers: [],
+                results: {}
+            };
+
+            const saveData = async () => {
+                await db.collection("campeonato").doc("pilotos").set({ lista: state.drivers });
+                await db.collection("campeonato").doc("resultados").set(state.results);
+            };
+
+            const loadData = async () => {
+                const pilotosDoc = await db.collection("campeonato").doc("pilotos").get();
+                if (pilotosDoc.exists) {
+                    state.drivers = pilotosDoc.data().lista;
+                }
+
+                const resultadosDoc = await db.collection("campeonato").doc("resultados").get();
+                if (resultadosDoc.exists) {
+                    state.results = resultadosDoc.data();
+                }
+
+                updateAll(); 
+            };
+
+            const calculatePointsForRace = (driverName, raceName) => {
+                const raceResults = state.results[raceName];
+                if (!raceResults || !raceResults[driverName]) return 0;
+                
+                const res = raceResults[driverName];
+                let totalPoints = 0;
+                if (res.qualifying === 1) totalPoints += 2;
+                if (res.sprint > 0 && res.sprint <= points.sprint.length) totalPoints += points.sprint[res.sprint - 1];
+                if (res.sprintFL && res.sprint > 0 && res.sprint <= 10) totalPoints += 1;
+                if (res.feature > 0 && res.feature <= points.feature.length) totalPoints += points.feature[res.feature - 1];
+                if (res.featureFL && res.feature > 0 && res.feature <= 10) totalPoints += 1;
+                return totalPoints;
+            };
+            
+            const renderDriverList = () => {
+                driverList.innerHTML = '';
+                state.drivers.forEach((driver, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `<span>${driver}</span> <button class="btn btn-danger btn-sm delete-driver-btn" data-index="${index}">Remover</button>`;
+                    driverList.appendChild(li);
+                });
+            };
+
+            const renderRaceSelector = () => {
+                races.forEach(race => {
+                    const option = document.createElement('option');
+                    option.value = race;
+                    option.textContent = race;
+                    raceSelector.appendChild(option);
+                });
+            };
+
+            const renderRaceTable = () => {
+                const selectedRace = raceSelector.value;
+                if (state.drivers.length === 0) {
+                    raceTableContainer.innerHTML = '<p class="text-muted">Adicione pilotos para inserir os resultados.</p>';
+                    saveResultsBtn.style.display = 'none';
+                    return;
+                }
+                
+                saveResultsBtn.style.display = 'inline-block';
+                let tableHTML = `
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Piloto</th>
+                                <th>Qualifying</th>
+                                <th>Pos. Sprint</th>
+                                <th>FL (Sprint)</th>
+                                <th>Pos. Feature</th>
+                                <th>FL (Feature)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                
+                state.drivers.forEach(driver => {
+                    const savedResult = state.results[selectedRace]?.[driver] || {};
+                    tableHTML += `
+                        <tr data-driver="${driver}">
+                            <td class="text-start fw-bold">${driver}</td>
+                            <td><input type="number" class="form-control form-control-sm qualifying" min="1" value="${savedResult.qualifying || ''}"></td>
+                            <td><input type="number" class="form-control form-control-sm sprint" min="1" value="${savedResult.sprint || ''}"></td>
+                            <td><div class="form-check d-flex justify-content-center"><input type="checkbox" class="form-check-input sprintFL" ${savedResult.sprintFL ? 'checked' : ''}></div></td>
+                            <td><input type="number" class="form-control form-control-sm feature" min="1" value="${savedResult.feature || ''}"></td>
+                            <td><div class="form-check d-flex justify-content-center"><input type="checkbox" class="form-check-input featureFL" ${savedResult.featureFL ? 'checked' : ''}></div></td>
+                        </tr>`;
+                });
+
+                tableHTML += `</tbody></table>`;
+                raceTableContainer.innerHTML = tableHTML;
+            };
+
+            const renderStandingsTable = () => {
+                 if (state.drivers.length === 0) {
+                    standingsTableContainer.innerHTML = '<p class="text-muted">Nenhum piloto no campeonato.</p>';
+                    return;
+                }
+
+                let tableHTML = `<table class="table table-hover"><thead><tr><th class="text-start">Piloto</th>`;
+                races.forEach(race => {
+                    tableHTML += `<th>${race.split('–')[1].split('(')[0].trim()}</th>`;
+                });
+                tableHTML += `<th>TOTAL</th></tr></thead><tbody>`;
+
+                const sortedDrivers = [...state.drivers].sort((a, b) => {
+                    const pointsA = races.reduce((sum, race) => sum + calculatePointsForRace(a, race), 0);
+                    const pointsB = races.reduce((sum, race) => sum + calculatePointsForRace(b, race), 0);
+                    return pointsB - pointsA;
+                });
+
+                sortedDrivers.forEach(driver => {
+                    let totalPoints = 0;
+                    tableHTML += `<tr><td class="text-start fw-bold">${driver}</td>`;
+                    races.forEach(race => {
+                        const points = calculatePointsForRace(driver, race);
+                        totalPoints += points;
+                        tableHTML += `<td>${points || '-'}</td>`;
+                    });
+                    tableHTML += `<td class="fw-bold">${totalPoints}</td></tr>`;
+                });
+
+                tableHTML += `</tbody></table>`;
+                standingsTableContainer.innerHTML = tableHTML;
+            };
+
+            const updateAll = () => {
+                renderDriverList();
+                renderRaceTable();
+                renderStandingsTable();
+            };
+
+            addDriverBtn.addEventListener('click', () => {
+                const name = driverNameInput.value.trim();
+                if (name && !state.drivers.includes(name)) {
+                    state.drivers.push(name);
+                    driverNameInput.value = '';
+                    saveData();
+                    updateAll();
+                } else if (state.drivers.includes(name)) {
+                    alert('Este piloto já existe.');
+                }
+            });
+
+            driverList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-driver-btn')) {
+                    const index = parseInt(e.target.dataset.index, 10);
+                    state.drivers.splice(index, 1);
+                    saveData();
+                    updateAll();
+                }
+            });
+
+            resetChampionshipBtn.addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja apagar TODOS os pilotos e resultados? Esta ação não pode ser desfeita.')) {
+                    localStorage.removeItem('f2ChampionshipState');
+                    state.drivers = [];
+                    state.results = {};
+                    updateAll();
+                    location.reload();
+                }
+            });
+
+            raceSelector.addEventListener('change', renderRaceTable);
+
+            saveResultsBtn.addEventListener('click', () => {
+                const selectedRace = raceSelector.value;
+                if (!state.results[selectedRace]) {
+                    state.results[selectedRace] = {};
+                }
+                const rows = raceTableContainer.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const driver = row.dataset.driver;
+                    state.results[selectedRace][driver] = {
+                        qualifying: parseInt(row.querySelector('.qualifying').value, 10) || 0,
+                        sprint: parseInt(row.querySelector('.sprint').value, 10) || 0,
+                        sprintFL: row.querySelector('.sprintFL').checked,
+                        feature: parseInt(row.querySelector('.feature').value, 10) || 0,
+                        featureFL: row.querySelector('.featureFL').checked,
+                    };
+                });
+                saveData();
+                renderStandingsTable();
+                alert(`Resultados para "${selectedRace.split('–')[1].trim()}" salvos com sucesso!`);
+            });
+            
+            loadData();
+            renderRaceSelector();
+            updateAll();
+        });
+    </script>
+</body>
+</html>
