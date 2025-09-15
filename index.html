@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Campeonato F2 2025 (Online)</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -72,7 +74,8 @@
         }
 
         .award-box-special {
-            background-color: rgba(255, 193, 7, 0.1); /* Dourado */
+            background-color: rgba(255, 193, 7, 0.1);
+            /* Dourado */
             border-left: 5px solid #ffc107;
             padding: 15px;
             margin-top: 20px;
@@ -80,7 +83,7 @@
         }
 
         .race-session {
-            margin-bottom: 2rem; 
+            margin-bottom: 2rem;
         }
     </style>
 </head>
@@ -107,6 +110,13 @@
                         <input type="password" class="form-control" id="password">
                     </div>
                     <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
+                    <div class="d-grid mb-2">
+                        <button id="googleLoginBtn" class="btn btn-outline-light">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                style="height: 18px; margin-right: 8px;">
+                            Entrar com Google
+                        </button>
+                    </div>
                     <div class="d-grid gap-2">
                         <button id="loginBtn" class="btn btn-primary">Entrar</button>
                         <button id="signupBtn" class="btn btn-secondary">Criar Conta</button>
@@ -128,12 +138,42 @@
                 </div>
             </div>
 
+            <div class="card mb-4" id="admin-panel" style="display: none;">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><i class="fas fa-user-shield me-2"></i>Administração de Usuários</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">Usuário</th>
+                                    <th>Email</th>
+                                    <th>Cargo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-list-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="card mb-4">
                 <div class="card-header">
                     <h2 class="h4 mb-0">Tabela Geral de Pontos</h2>
                 </div>
                 <div class="card-body">
                     <div id="standings-table-container" class="table-responsive"></div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><i class="fas fa-chart-line me-2"></i>Evolução do Campeonato (Top 5)</h2>
+                </div>
+                <div class="card-body">
+                    <canvas id="championshipChart"></canvas>
                 </div>
             </div>
 
@@ -221,10 +261,10 @@
     </div>
 
     <script type="module">
-        // Importa as funções necessárias do Firebase SDK v9
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getAuth, sendEmailVerification, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCnUImiz-OLoI6T3YkFk-yXOAFXPeUANfw",
@@ -244,6 +284,7 @@
         // Constantes e variáveis de estado
         const races = ["10/09 – Austrália (Melbourne)", "17/09 – França (Paul Ricard)", "24/09 – Áustria (Red Bull Ring)", "01/10 – Canadá (Montreal)", "08/10 – Grã-Bretanha (Silverstone)", "15/10 – Hungria (Hungaroring)", "22/10 – Itália (Monza)", "29/10 – Bélgica (Spa)", "05/11 – Azerbaijão (Baku)", "12/11 – Singapura (Marina Bay)", "19/11 – Rússia (Sochi)", "26/11 – México (Hermanos Rodríguez)", "03/12 – Mônaco (Mônaco)", "10/12 – Brasil (Interlagos)", "17/12 – Abu Dhabi (Yas Marina)"];
         const points = { sprint: [15, 12, 10, 8, 6, 4, 2, 1], feature: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] };
+        const adminPanel = document.getElementById('admin-panel');
         const loginContainer = document.getElementById('login-container');
         const appContent = document.getElementById('app-content');
         const emailInput = document.getElementById('email');
@@ -253,7 +294,7 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userDisplay = document.getElementById('user-display');
         const authError = document.getElementById('auth-error');
-        const usernameInput = document.getElementById('username'); 
+        const usernameInput = document.getElementById('username');
         const driverNameInput = document.getElementById('driverNameInput');
         const addDriverBtn = document.getElementById('addDriverBtn');
         const driverList = document.getElementById('driverList');
@@ -262,28 +303,63 @@
         const raceTableContainer = document.getElementById('race-table-container');
         const saveResultsBtn = document.getElementById('saveResultsBtn');
         const standingsTableContainer = document.getElementById('standings-table-container');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
         let state = { drivers: [], results: {} };
 
         // --- LÓGICA DE AUTENTICAÇÃO ---
         onAuthStateChanged(auth, async (user) => {
-            if (user) { // Usuário está logado
-                // Busca o perfil do usuário no Firestore para pegar o username
+            if (user) {
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
 
+                let userProfile = null;
                 if (userDocSnap.exists()) {
-                    userDisplay.textContent = userDocSnap.data().username; // Mostra o username
+                    userProfile = userDocSnap.data();
+                    userDisplay.textContent = userProfile.username; // Usa a constante diretamente
                 } else {
-                    userDisplay.textContent = user.email; // Fallback para o email
+                    userDisplay.textContent = user.email; // Fallback
                 }
 
-                loginContainer.style.display = 'none';
-                appContent.style.display = 'block';
+                loginContainer.style.display = 'none'; // Usa a constante diretamente
+                appContent.style.display = 'block';    // Usa a constante diretamente
                 setupRealtimeListener();
-            } else { // Usuário não está logado
-                loginContainer.style.display = 'block';
-                appContent.style.display = 'none';
+
+                // LÓGICA DE EXIBIÇÃO DO PAINEL DE ADMIN CORRIGIDA
+                if (userProfile && userProfile.role === 'admin') {
+                    adminPanel.style.display = 'block'; // Usa a constante diretamente
+                    renderAdminPanel();
+                } else {
+                    adminPanel.style.display = 'none'; // Usa a constante diretamente
+                }
+
+            } else {
+                loginContainer.style.display = 'block'; // Usa a constante diretamente
+                appContent.style.display = 'none';    // Usa a constante diretamente
+                adminPanel.style.display = 'none';    // Usa a constante diretamente
             }
+        });
+
+        googleLoginBtn.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(async (result) => {
+                    const user = result.user;
+                    // Verifica se o usuário já existe no nosso banco de dados
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    // Se não existir, cria um perfil para ele
+                    if (!userDocSnap.exists()) {
+                        await setDoc(userDocRef, {
+                            email: user.email,
+                            username: user.displayName || user.email.split('@')[0], // Pega o nome do Google
+                            role: "viewer"
+                        });
+                    }
+                }).catch(error => {
+                    authError.textContent = error.message;
+                    authError.style.display = 'block';
+                });
         });
 
         loginBtn.addEventListener('click', () => {
@@ -295,6 +371,17 @@
             const email = emailInput.value;
             const password = passwordInput.value;
             const username = usernameInput.value.trim();
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    // Envia o e-mail de verificação
+                    sendEmailVerification(userCredential.user);
+
+                    alert("Conta criada! Um link de verificação foi enviado para o seu e-mail.");
+
+                    const userDocRef = doc(db, "users", userCredential.user.uid);
+                    return setDoc(userDocRef, { /* ...salva o perfil... */ });
+                })
 
             if (!username) {
                 authError.textContent = 'Por favor, insira um nome de usuário.';
@@ -309,7 +396,7 @@
                     return setDoc(userDocRef, {
                         email: email,
                         role: "viewer",
-                        username: username 
+                        username: username
                     });
                 })
                 .catch(error => { authError.textContent = error.message; authError.style.display = 'block'; });
@@ -339,11 +426,66 @@
             });
         };
 
+        // ADICIONE ESTE NOVO BLOCO DE CÓDIGO
+        const renderAdminPanel = async () => {
+            const userListTbody = document.getElementById('user-list-tbody');
+            userListTbody.innerHTML = '<tr><td colspan="3">Carregando usuários...</td></tr>';
+
+            const usersRef = collection(db, "users");
+            const querySnapshot = await getDocs(usersRef);
+
+            let usersHTML = '';
+            querySnapshot.forEach(doc => {
+                const userData = doc.data();
+                const uid = doc.id;
+
+                usersHTML += `
+                    <tr>
+                        <td class="text-start">${userData.username || 'N/A'}</td>
+                        <td>${userData.email}</td>
+                        <td>
+                            <select class="form-select form-select-sm user-role-select" data-uid="${uid}">
+                                <option value="viewer" ${userData.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+                                <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            userListTbody.innerHTML = usersHTML;
+
+            // Adiciona os "ouvintes" de eventos para cada dropdown de cargo
+            document.querySelectorAll('.user-role-select').forEach(selectElement => {
+                selectElement.addEventListener('change', async (e) => {
+                    const newRole = e.target.value;
+                    const uidToUpdate = e.target.dataset.uid;
+
+                    if (confirm(`Tem certeza que deseja alterar o cargo deste usuário para "${newRole}"?`)) {
+                        const userDocRef = doc(db, "users", uidToUpdate);
+                        try {
+                            // Usamos set com merge:true para atualizar apenas o campo 'role'
+                            await setDoc(userDocRef, { role: newRole }, { merge: true });
+                            alert('Cargo atualizado com sucesso!');
+                        } catch (error) {
+                            console.error("Erro ao atualizar cargo: ", error);
+                            alert('Falha ao atualizar o cargo. Verifique as regras de segurança.');
+                            // Reverte a mudança visual em caso de erro
+                            e.target.value = newRole === 'admin' ? 'viewer' : 'admin';
+                        }
+                    } else {
+                        // Reverte a mudança visual se o usuário cancelar
+                        e.target.value = newRole === 'admin' ? 'viewer' : 'admin';
+                    }
+                });
+            });
+        };
+
         // --- LÓGICA DA APLICAÇÃO E RENDERIZAÇÃO ---
         const calculatePointsForRace = (driverName, raceName) => {
             const res = state.results[raceName]?.[driverName];
             if (!res) return 0;
-            
+
             let totalPoints = 0;
             const qualiPos = parseInt(res.qualifying, 10);
             const sprintPos = parseInt(res.sprint, 10);
@@ -354,7 +496,7 @@
             if (res.sprintFL && !isNaN(sprintPos) && sprintPos > 0 && sprintPos <= 10) totalPoints += 1;
             if (!isNaN(featurePos) && featurePos > 0 && featurePos <= points.feature.length) totalPoints += points.feature[featurePos - 1];
             if (res.featureFL && !isNaN(featurePos) && featurePos > 0 && featurePos <= 10) totalPoints += 1;
-            
+
             return totalPoints;
         };
 
@@ -460,10 +602,10 @@
             };
 
             let tableHTML = `<table class="table table-hover table-sm"><thead><tr><th class="text-start">Piloto</th><th>Qualifying</th><th>Pos. Sprint</th><th>FL (Sprint)</th><th>Pos. Feature</th><th>FL (Feature)</th></tr></thead><tbody>`;
-            
-            state.drivers.forEach(driver => { 
+
+            state.drivers.forEach(driver => {
                 const savedResult = state.results[selectedRace]?.[driver] || {};
-                
+
                 const qualifyingSelect = createPositionSelect('qualifying', savedResult.qualifying);
                 const sprintSelect = createPositionSelect('sprint', savedResult.sprint);
                 const featureSelect = createPositionSelect('feature', savedResult.feature);
@@ -483,7 +625,7 @@
         const renderStandingsTable = () => {
             if (state.drivers.length === 0) { standingsTableContainer.innerHTML = '<p class="text-muted">Nenhum piloto no campeonato.</p>'; return; }
             let tableHTML = `<table class="table table-hover"><thead><tr><th class="text-start">Piloto</th>`;
-            races.forEach(race => {     tableHTML += `<th class="race-header-clickable" style="cursor: pointer;" data-race-name="${race}">${race.split('–')[1].split('(')[0].trim()}</th>`; });
+            races.forEach(race => { tableHTML += `<th class="race-header-clickable" style="cursor: pointer;" data-race-name="${race}">${race.split('–')[1].split('(')[0].trim()}</th>`; });
             tableHTML += `<th>TOTAL</th></tr></thead><tbody>`;
 
             const sortedDrivers = [...state.drivers].sort((a, b) => {
@@ -504,10 +646,13 @@
             });
             standingsTableContainer.innerHTML = tableHTML + `</tbody></table>`;
         };
+
         const updateAll = () => {
             renderDriverList();
-            renderRaceTable();
+            renderRaceSelector();
             renderStandingsTable();
+            renderRaceTable();
+            renderChampionshipChart(); 
         };
 
         // --- EVENT LISTENERS ---
@@ -542,7 +687,7 @@
 
             const selectedRace = raceSelector.value;
             if (!state.results[selectedRace]) state.results[selectedRace] = {};
-            
+
             raceTableContainer.querySelectorAll('tbody tr').forEach(row => {
                 const driver = row.dataset.driver;
                 // A lógica de salvar agora é mais direta, apenas pega o valor do select
@@ -609,22 +754,22 @@
                         bestRecovery = { name: driver, positionsGained: positionsGained };
                     }
                 }
-                
+
                 if (!isNaN(qualiPos) && qualiPos === 1) {
                     mrSaturday = driver;
                 }
             });
-            
+
             const featureWinnerData = allDriversResults.find(d => parseInt(d.result.feature, 10) === 1);
             if (featureWinnerData && featureWinnerData.name === mrSaturday && featureWinnerData.result.featureFL) {
                 perfectWeekendWinner = featureWinnerData.name;
             }
 
             // --- PASSO 2: Geração do HTML ---
-            
+
             let awardsHTML = '<div class="race-session"><h4><i class="fas fa-trophy me-2"></i>Hall da Fama da Etapa</h4>';
             let hasAwards = false;
-            
+
             if (perfectWeekendWinner) {
                 hasAwards = true;
                 awardsHTML += `<div class="award-box-special"><h5 class="mb-0">⭐ Prêmio Domínio Total</h5><p class="fs-4 mb-0">${perfectWeekendWinner}</p><p class="lead fw-bold">Pole, Vitória e Volta Mais Rápida!</p></div>`;
@@ -680,7 +825,7 @@
                 featureRaceHTML += '<p class="text-muted small">Resultados da corrida principal não inseridos.</p>';
             }
             featureRaceHTML += '</div>';
-            
+
             let sprintRaceHTML = '<div class="race-session"><h5><i class="fas fa-fast-forward me-2"></i>Corrida Sprint</h5>';
             let sprintResults = [...allDriversResults].sort((a, b) => {
                 const posA = parseInt(a.result.sprint, 10); const posB = parseInt(b.result.sprint, 10);
@@ -689,22 +834,104 @@
                 return (a.result.sprint || '').localeCompare(b.result.sprint || '');
             });
             if (sprintResults.some(d => d.result && d.result.sprint)) {
-                 sprintRaceHTML += '<table class="table table-sm"><thead><tr><th>Pos.</th><th class="text-start">Piloto</th></tr></thead><tbody>';
+                sprintRaceHTML += '<table class="table table-sm"><thead><tr><th>Pos.</th><th class="text-start">Piloto</th></tr></thead><tbody>';
                 sprintResults.forEach(d => {
                     const sprintPos = parseInt(d.result.sprint);
                     if (d.result.sprint && (sprintPos > 0 || isNaN(sprintPos))) {
-                         sprintRaceHTML += `<tr><td><strong>${d.result.sprint}</strong></td><td class="text-start">${d.name}</td></tr>`;
+                        sprintRaceHTML += `<tr><td><strong>${d.result.sprint}</strong></td><td class="text-start">${d.name}</td></tr>`;
                     }
                 });
-                 sprintRaceHTML += '</tbody></table>';
+                sprintRaceHTML += '</tbody></table>';
             } else {
-                 sprintRaceHTML += '<p class="text-muted small">Resultados da corrida sprint não inseridos.</p>';
+                sprintRaceHTML += '<p class="text-muted small">Resultados da corrida sprint não inseridos.</p>';
             }
             sprintRaceHTML += '</div>';
 
             modalBody.innerHTML = awardsHTML + qualifyingHTML + featureRaceHTML + sprintRaceHTML;
             raceHubModal.show();
         }
+
+        let championshipChartInstance = null; // Variável para guardar a instância do gráfico
+
+        // SUBSTITUA ESTA FUNÇÃO INTEIRA PELA VERSÃO CORRIGIDA
+        const renderChampionshipChart = () => {
+            const canvas = document.getElementById('championshipChart');
+            if (!canvas) return;
+
+            // Destrói o gráfico anterior se ele existir para evitar bugs
+            if (championshipChartInstance) {
+                championshipChartInstance.destroy();
+            }
+
+            // --- PASSO 1: Encontra o índice da última corrida com resultados ---
+            let lastRaceIndex = -1;
+            races.forEach((race, index) => {
+                // Verifica se existe algum resultado salvo para esta corrida
+                if (state.results[race] && Object.keys(state.results[race]).length > 0) {
+                    lastRaceIndex = index;
+                }
+            });
+
+            // Se nenhuma corrida foi preenchida ainda, simplesmente limpa o canvas e não desenha nada.
+            if (lastRaceIndex === -1) {
+                const context = canvas.getContext('2d');
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                // (Opcional) Poderíamos adicionar uma mensagem de "Aguardando primeiros resultados..."
+                return;
+            }
+
+            // --- PASSO 2: "Corta" os dados para incluir apenas até a última corrida preenchida ---
+            const activeRaces = races.slice(0, lastRaceIndex + 1);
+            const raceLabels = activeRaces.map(race => race.split('–')[1].split('(')[0].trim());
+
+            // --- PASSO 3: Preparação dos Dados (agora usando 'activeRaces') ---
+            const driverPointsPerRace = {};
+            state.drivers.forEach(driver => {
+                let cumulativePoints = 0;
+                // O map agora é feito apenas no array das corridas ativas
+                driverPointsPerRace[driver] = activeRaces.map(race => {
+                    cumulativePoints += calculatePointsForRace(driver, race);
+                    return cumulativePoints;
+                });
+            });
+
+            const sortedDrivers = Object.keys(driverPointsPerRace).sort((a, b) => {
+                const totalA = driverPointsPerRace[a][driverPointsPerRace[a].length - 1];
+                const totalB = driverPointsPerRace[b][driverPointsPerRace[b].length - 1];
+                return totalB - totalA;
+            });
+            
+            const top5Drivers = sortedDrivers.slice(0, 10);
+
+            const datasets = top5Drivers.map((driverName, index) => {
+                const colors = ['#0d6efd', '#dc3545', '#ffc107', '#198754', '#adb5bd', '#993399', '#ff5c00', '#ff007f', '#00ffff', '#adff2f'];
+                return {
+                    label: driverName,
+                    data: driverPointsPerRace[driverName],
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length] + '33',
+                    fill: false,
+                    tension: 0.1
+                };
+            });
+
+            // --- PASSO 4: Renderização do Gráfico ---
+            championshipChartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: raceLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Pontuação Cumulativa por Etapa' }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        };
 
         standingsTableContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('driver-name-clickable')) {
