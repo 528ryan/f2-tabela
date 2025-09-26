@@ -1,969 +1,226 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-bs-theme="dark">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campeonato F2 2025 (Online)</title>
-
+    <title>MotorSport Pro - Championship Management Platform</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.google.com/specimen/Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-
-    <style>
-        body {
-            font-family: 'Titillium Web', sans-serif;
-            background-color: #1a1a1a;
-            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            background-attachment: fixed;
-        }
-
-        .table {
-            --bs-table-bg: #343a40;
-            --bs-table-border-color: #495057;
-        }
-
-        .table-hover>tbody>tr:hover>* {
-            --bs-table-hover-bg: #495057;
-        }
-
-        .card {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #login-container {
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        body {
-            background-color: #1a1a1a;
-            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            background-attachment: fixed;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .card,
-        .btn {
-            transition: all 0.3s ease-in-out;
-        }
-
-        .award-box {
-            background-color: rgba(0, 123, 255, 0.1);
-            border-left: 5px solid #0d6efd;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-
-        .award-box-special {
-            background-color: rgba(255, 193, 7, 0.1);
-            /* Dourado */
-            border-left: 5px solid #ffc107;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-
-        .race-session {
-            margin-bottom: 2rem;
-        }
-    </style>
+    
+    <link rel="stylesheet" href="styles/main.css">
 </head>
-
 <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#" id="platform-brand">
+                <i class="bi bi-flag-fill me-2"></i>MotorSport Pro
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto" id="main-nav">
+                    <!-- Navigation items will be populated by JavaScript -->
+                </ul>
+                
+                <div class="navbar-nav" id="user-nav">
+                    <!-- User navigation will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container my-4">
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Login Screen -->
+        <div id="login-screen" class="auth-screen">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="auth-card">
+                            <div class="text-center mb-4">
+                                <i class="bi bi-flag-fill display-4 text-primary"></i>
+                                <h2 class="mt-3">MotorSport Pro</h2>
+                                <p class="text-muted">Professional Championship Management</p>
+                            </div>
+                            
+                            <div id="auth-tabs">
+                                <ul class="nav nav-pills nav-justified mb-4" role="tablist">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#login-tab">Login</button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#register-tab">Register</button>
+                                    </li>
+                                </ul>
+                                
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="login-tab">
+                                        <form id="login-form">
+                                            <div class="mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="login-email" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="login-password" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                                        </form>
+                                        
+                                        <div class="text-center">
+                                            <div class="divider">or</div>
+                                            <button id="google-login" class="btn btn-outline-light w-100">
+                                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="me-2" style="height: 18px;">
+                                                Continue with Google
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tab-pane fade" id="register-tab">
+                                        <form id="register-form">
+                                            <div class="mb-3">
+                                                <label class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="register-username" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="register-email" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="register-password" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="auth-error" class="alert alert-danger mt-3" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div id="login-container">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title text-center">Login</h2>
-                    <p class="text-center text-muted">Acesso ao painel do campeonato</p>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" placeholder="seu@email.com">
-                    </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nome de Usuário</label>
-                        <input type="text" class="form-control" id="username" placeholder="Seu apelido">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Senha</label>
-                        <input type="password" class="form-control" id="password">
-                    </div>
-                    <div id="auth-error" class="alert alert-danger" style="display: none;"></div>
-                    <div class="d-grid mb-2">
-                        <button id="googleLoginBtn" class="btn btn-outline-light">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                                style="height: 18px; margin-right: 8px;">
-                            Entrar com Google
+        <!-- App Content -->
+        <div id="app-content" style="display: none;">
+            <div class="container-fluid">
+                <!-- Championship Selection -->
+                <div id="championship-selector" class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">Select Championship</h4>
+                            <p class="text-muted mb-0">Choose a championship to view or manage</p>
+                        </div>
+                        <button class="btn btn-primary" id="create-championship-btn" style="display: none;">
+                            <i class="bi bi-plus-lg me-2"></i>Create Championship
                         </button>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button id="loginBtn" class="btn btn-primary">Entrar</button>
-                        <button id="signupBtn" class="btn btn-secondary">Criar Conta</button>
+                    <div class="row mt-3" id="championships-grid">
+                        <!-- Championships will be populated here -->
                     </div>
+                </div>
+
+                <!-- Championship Dashboard -->
+                <div id="championship-dashboard" style="display: none;">
+                    <!-- Dashboard content will be populated here -->
                 </div>
             </div>
         </div>
+    </main>
 
-        <div id="app-content" style="display: none;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="display-5 fw-bold">Campeonato de Fórmula 2 - 2025</h1>
-                    <p class="text-muted mb-0">Painel Administrativo</p>
-                </div>
-                <div id="user-status" class="text-end">
-                    <span id="user-display" class="me-3"></span>
-                    <button id="logoutBtn" class="btn btn-danger btn-sm"><i
-                            class="fas fa-sign-out-alt me-2"></i>Sair</button>
-                </div>
-            </div>
-
-            <div class="card mb-4" id="admin-panel" style="display: none;">
-                <div class="card-header">
-                    <h2 class="h4 mb-0"><i class="fas fa-user-shield me-2"></i>Administração de Usuários</h2>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th class="text-start">Usuário</th>
-                                    <th>Email</th>
-                                    <th>Cargo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="user-list-tbody">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h2 class="h4 mb-0">Tabela Geral de Pontos</h2>
-                </div>
-                <div class="card-body">
-                    <div id="standings-table-container" class="table-responsive"></div>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h2 class="h4 mb-0"><i class="fas fa-chart-line me-2"></i>Evolução do Campeonato (Top 5)</h2>
-                </div>
-                <div class="card-body">
-                    <canvas id="championshipChart"></canvas>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-5">
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h2 class="h4 mb-0"><i class="fas fa-users me-2"></i>Gerenciar Pilotos</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="input-group mb-3">
-                                <input type="text" id="driverNameInput" class="form-control"
-                                    placeholder="Nome do Piloto">
-                                <button id="addDriverBtn" class="btn btn-primary"> <i
-                                        class="fas fa-user-plus me-2"></i></i>> Adicionar Piloto</button>
-                            </div>
-                            <ul id="driverList" class="list-group"></ul>
-                            <button id="resetChampionshipBtn" class="btn btn-danger mt-3">Resetar Campeonato</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-7">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h2 class="h4 mb-0">Resultados da Corrida</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="raceSelector" class="form-label">Selecione a Corrida:</label>
-                                <select id="raceSelector" class="form-select"></select>
-                            </div>
-                            <div id="race-table-container" class="table-responsive"></div>
-                            <button id="saveResultsBtn" class="btn btn-success mt-3"><i
-                                    class="fas fa-save me-2"></i>Salvar Resultados</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
-    <div class="modal fade" id="driverStatsModal" tabindex="-1" aria-labelledby="driverStatsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+    <!-- Modals -->
+    <div class="modal fade" id="create-championship-modal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalDriverName">Nome do Piloto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Create New Championship</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <h4>Pontos Totais</h4>
-                            <p class="display-6" id="modalTotalPoints">0</p>
+                    <form id="create-championship-form">
+                        <div class="mb-3">
+                            <label class="form-label">Championship Name</label>
+                            <input type="text" class="form-control" id="championship-name" required>
                         </div>
-                        <div class="col-4">
-                            <h4>Vitórias</h4>
-                            <p class="display-6" id="modalWins">0</p>
+                        <div class="mb-3">
+                            <label class="form-label">Series</label>
+                            <select class="form-select" id="championship-series" required>
+                                <option value="">Select Series</option>
+                                <option value="f1">Formula 1</option>
+                                <option value="f2">Formula 2</option>
+                                <option value="f3">Formula 3</option>
+                                <option value="indycar">IndyCar</option>
+                                <option value="nascar">NASCAR</option>
+                                <option value="wec">WEC</option>
+                                <option value="custom">Custom</option>
+                            </select>
                         </div>
-                        <div class="col-4">
-                            <h4>Pódios</h4>
-                            <p class="display-6" id="modalPodiums">0</p>
+                        <div class="mb-3">
+                            <label class="form-label">Season</label>
+                            <input type="number" class="form-control" id="championship-season" value="2025" required>
                         </div>
-                        <div class="col-6 mt-3">
-                            <h5>Pole Positions</h5>
-                            <p class="h3" id="modalPoles">0</p>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="championship-description" rows="3"></textarea>
                         </div>
-                        <div class="col-6 mt-3">
-                            <h5>Voltas Mais Rápidas</h5>
-                            <p class="h3" id="modalFastestLaps">0</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <h5 class="mt-4">Resultados por Corrida:</h5>
-                    <ul class="list-group" id="modalRaceResultsList">
-                    </ul>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-championship">Create Championship</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { getAuth, sendEmailVerification, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnUImiz-OLoI6T3YkFk-yXOAFXPeUANfw",
-            authDomain: "f2-campeonato.firebaseapp.com",
-            projectId: "f2-campeonato",
-            storageBucket: "f2-campeonato.firebasestorage.app",
-            messagingSenderId: "667581747059",
-            appId: "1:667581747059:web:54ccd5254353e5bccfff06",
-            measurementId: "G-9S30PKEYSJ"
-        };
-
-        // Inicializa os serviços do Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Constantes e variáveis de estado
-        const races = ["10/09 – Austrália (Melbourne)", "17/09 – França (Paul Ricard)", "24/09 – Áustria (Red Bull Ring)", "01/10 – Canadá (Montreal)", "08/10 – Grã-Bretanha (Silverstone)", "15/10 – Hungria (Hungaroring)", "22/10 – Itália (Monza)", "29/10 – Bélgica (Spa)", "05/11 – Azerbaijão (Baku)", "12/11 – Singapura (Marina Bay)", "19/11 – Rússia (Sochi)", "26/11 – México (Hermanos Rodríguez)", "03/12 – Mônaco (Mônaco)", "10/12 – Brasil (Interlagos)", "17/12 – Abu Dhabi (Yas Marina)"];
-        const points = { sprint: [15, 12, 10, 8, 6, 4, 2, 1], feature: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] };
-        const adminPanel = document.getElementById('admin-panel');
-        const loginContainer = document.getElementById('login-container');
-        const appContent = document.getElementById('app-content');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userDisplay = document.getElementById('user-display');
-        const authError = document.getElementById('auth-error');
-        const usernameInput = document.getElementById('username');
-        const driverNameInput = document.getElementById('driverNameInput');
-        const addDriverBtn = document.getElementById('addDriverBtn');
-        const driverList = document.getElementById('driverList');
-        const resetChampionshipBtn = document.getElementById('resetChampionshipBtn');
-        const raceSelector = document.getElementById('raceSelector');
-        const raceTableContainer = document.getElementById('race-table-container');
-        const saveResultsBtn = document.getElementById('saveResultsBtn');
-        const standingsTableContainer = document.getElementById('standings-table-container');
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        let state = { drivers: [], results: {} };
-
-        // --- LÓGICA DE AUTENTICAÇÃO ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDocRef = doc(db, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-
-                let userProfile = null;
-                if (userDocSnap.exists()) {
-                    userProfile = userDocSnap.data();
-                    userDisplay.textContent = userProfile.username; // Usa a constante diretamente
-                } else {
-                    userDisplay.textContent = user.email; // Fallback
-                }
-
-                loginContainer.style.display = 'none'; // Usa a constante diretamente
-                appContent.style.display = 'block';    // Usa a constante diretamente
-                setupRealtimeListener();
-
-                // LÓGICA DE EXIBIÇÃO DO PAINEL DE ADMIN CORRIGIDA
-                if (userProfile && userProfile.role === 'admin') {
-                    adminPanel.style.display = 'block'; // Usa a constante diretamente
-                    renderAdminPanel();
-                } else {
-                    adminPanel.style.display = 'none'; // Usa a constante diretamente
-                }
-
-            } else {
-                loginContainer.style.display = 'block'; // Usa a constante diretamente
-                appContent.style.display = 'none';    // Usa a constante diretamente
-                adminPanel.style.display = 'none';    // Usa a constante diretamente
-            }
-        });
-
-        googleLoginBtn.addEventListener('click', () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider)
-                .then(async (result) => {
-                    const user = result.user;
-                    // Verifica se o usuário já existe no nosso banco de dados
-                    const userDocRef = doc(db, "users", user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
-
-                    // Se não existir, cria um perfil para ele
-                    if (!userDocSnap.exists()) {
-                        await setDoc(userDocRef, {
-                            email: user.email,
-                            username: user.displayName || user.email.split('@')[0], // Pega o nome do Google
-                            role: "viewer"
-                        });
-                    }
-                }).catch(error => {
-                    authError.textContent = error.message;
-                    authError.style.display = 'block';
-                });
-        });
-
-        loginBtn.addEventListener('click', () => {
-            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-                .catch(error => { authError.textContent = error.message; authError.style.display = 'block'; });
-        });
-
-        signupBtn.addEventListener('click', () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            const username = usernameInput.value.trim();
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    // Envia o e-mail de verificação
-                    sendEmailVerification(userCredential.user);
-
-                    alert("Conta criada! Um link de verificação foi enviado para o seu e-mail.");
-
-                    const userDocRef = doc(db, "users", userCredential.user.uid);
-                    return setDoc(userDocRef, { /* ...salva o perfil... */ });
-                })
-
-            if (!username) {
-                authError.textContent = 'Por favor, insira um nome de usuário.';
-                authError.style.display = 'block';
-                return;
-            }
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    const userDocRef = doc(db, "users", userCredential.user.uid);
-                    // Agora salvamos também o username
-                    return setDoc(userDocRef, {
-                        email: email,
-                        role: "viewer",
-                        username: username
-                    });
-                })
-                .catch(error => { authError.textContent = error.message; authError.style.display = 'block'; });
-        });
-
-        logoutBtn.addEventListener('click', () => signOut(auth));
-
-        // --- LÓGICA DO BANCO DE DADOS ---
-        const saveData = async () => {
-            try {
-                await setDoc(doc(db, "campeonato", "pilotos"), { lista: state.drivers });
-                await setDoc(doc(db, "campeonato", "resultados"), state.results);
-            } catch (error) { console.error("Erro ao salvar dados: ", error); alert("Erro ao salvar. Verifique se você é um admin."); }
-        };
-
-        const setupRealtimeListener = () => {
-            const collectionRef = collection(db, "campeonato");
-            onSnapshot(collectionRef, (snapshot) => {
-                let driversData = [], resultsData = {};
-                snapshot.forEach((doc) => {
-                    if (doc.id === "pilotos" && doc.data().lista) driversData = doc.data().lista;
-                    if (doc.id === "resultados") resultsData = doc.data();
-                });
-                state.drivers = driversData;
-                state.results = resultsData;
-                updateAll();
-            });
-        };
-
-        // ADICIONE ESTE NOVO BLOCO DE CÓDIGO
-        const renderAdminPanel = async () => {
-            const userListTbody = document.getElementById('user-list-tbody');
-            userListTbody.innerHTML = '<tr><td colspan="3">Carregando usuários...</td></tr>';
-
-            const usersRef = collection(db, "users");
-            const querySnapshot = await getDocs(usersRef);
-
-            let usersHTML = '';
-            querySnapshot.forEach(doc => {
-                const userData = doc.data();
-                const uid = doc.id;
-
-                usersHTML += `
-                    <tr>
-                        <td class="text-start">${userData.username || 'N/A'}</td>
-                        <td>${userData.email}</td>
-                        <td>
-                            <select class="form-select form-select-sm user-role-select" data-uid="${uid}">
-                                <option value="viewer" ${userData.role === 'viewer' ? 'selected' : ''}>Viewer</option>
-                                <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            userListTbody.innerHTML = usersHTML;
-
-            // Adiciona os "ouvintes" de eventos para cada dropdown de cargo
-            document.querySelectorAll('.user-role-select').forEach(selectElement => {
-                selectElement.addEventListener('change', async (e) => {
-                    const newRole = e.target.value;
-                    const uidToUpdate = e.target.dataset.uid;
-
-                    if (confirm(`Tem certeza que deseja alterar o cargo deste usuário para "${newRole}"?`)) {
-                        const userDocRef = doc(db, "users", uidToUpdate);
-                        try {
-                            // Usamos set com merge:true para atualizar apenas o campo 'role'
-                            await setDoc(userDocRef, { role: newRole }, { merge: true });
-                            alert('Cargo atualizado com sucesso!');
-                        } catch (error) {
-                            console.error("Erro ao atualizar cargo: ", error);
-                            alert('Falha ao atualizar o cargo. Verifique as regras de segurança.');
-                            // Reverte a mudança visual em caso de erro
-                            e.target.value = newRole === 'admin' ? 'viewer' : 'admin';
-                        }
-                    } else {
-                        // Reverte a mudança visual se o usuário cancelar
-                        e.target.value = newRole === 'admin' ? 'viewer' : 'admin';
-                    }
-                });
-            });
-        };
-
-        // --- LÓGICA DA APLICAÇÃO E RENDERIZAÇÃO ---
-        const calculatePointsForRace = (driverName, raceName) => {
-            const res = state.results[raceName]?.[driverName];
-            if (!res) return 0;
-
-            let totalPoints = 0;
-            const qualiPos = parseInt(res.qualifying, 10);
-            const sprintPos = parseInt(res.sprint, 10);
-            const featurePos = parseInt(res.feature, 10);
-
-            if (!isNaN(qualiPos) && qualiPos === 1) totalPoints += 2;
-            if (!isNaN(sprintPos) && sprintPos > 0 && sprintPos <= points.sprint.length) totalPoints += points.sprint[sprintPos - 1];
-            if (res.sprintFL && !isNaN(sprintPos) && sprintPos > 0 && sprintPos <= 10) totalPoints += 1;
-            if (!isNaN(featurePos) && featurePos > 0 && featurePos <= points.feature.length) totalPoints += points.feature[featurePos - 1];
-            if (res.featureFL && !isNaN(featurePos) && featurePos > 0 && featurePos <= 10) totalPoints += 1;
-
-            return totalPoints;
-        };
-
-        const statsModalElement = document.getElementById('driverStatsModal');
-        const statsModal = new bootstrap.Modal(statsModalElement);
-
-        const showDriverStats = (driverName) => {
-            // A função agora não precisa procurar pela equipe
-            if (!driverName) return;
-
-            let wins = 0, podiums = 0, poles = 0, fastestLaps = 0;
-            let raceResultsHTML = '';
-
-            const totalPoints = races.reduce((sum, race) => {
-                const raceResult = state.results[race]?.[driverName];
-                const points = calculatePointsForRace(driverName, race);
-                if (raceResult) {
-                    if (raceResult.qualifying === 1) poles++;
-                    if (raceResult.feature === 1) wins++;
-                    if (raceResult.feature > 0 && raceResult.feature <= 3) podiums++;
-                    if (raceResult.sprintFL && raceResult.sprint > 0 && raceResult.sprint <= 10) fastestLaps++;
-                    if (raceResult.featureFL && raceResult.feature > 0 && raceResult.feature <= 10) fastestLaps++;
-                    raceResultsHTML += `<li class="list-group-item">${race.split('–')[1].trim()}: <strong>${points} ponto(s)</strong></li>`;
-                } else {
-                    raceResultsHTML += `<li class="list-group-item text-muted">${race.split('–')[1].trim()}: Não participou</li>`;
-                }
-                return sum + points;
-            }, 0);
-
-            // Preenche o modal sem a equipe
-            document.getElementById('modalDriverName').textContent = driverName;
-            document.getElementById('modalTotalPoints').textContent = totalPoints;
-            document.getElementById('modalWins').textContent = wins;
-            document.getElementById('modalPodiums').textContent = podiums;
-            document.getElementById('modalPoles').textContent = poles;
-            document.getElementById('modalFastestLaps').textContent = fastestLaps;
-            document.getElementById('modalRaceResultsList').innerHTML = raceResultsHTML;
-
-            statsModal.show();
-        };
-
-        const renderDriverList = () => {
-            driverList.innerHTML = '';
-            state.drivers.forEach((driver) => { // 'driver' aqui é uma string
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `<span>${driver}</span> <button class="btn btn-danger btn-sm delete-driver-btn" data-driver-name="${driver}">Remover</button>`;
-                driverList.appendChild(li);
-            });
-        };
-        const renderRaceSelector = () => {
-            raceSelector.innerHTML = '';
-            let nextRaceFound = false;
-
-            // Pega a data de hoje e zera as horas para comparar apenas os dias
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            races.forEach(race => {
-                const option = document.createElement('option');
-                option.value = race;
-                option.textContent = race;
-
-                // Extrai o dia e o mês do texto da corrida (ex: "10/09")
-                const dateParts = race.split(' ')[0].split('/');
-                const day = parseInt(dateParts[0], 10);
-                const month = parseInt(dateParts[1], 10);
-
-                // Cria um objeto Date para a corrida no ano de 2025
-                // (Lembre-se que os meses em JavaScript são de 0 a 11)
-                const raceDate = new Date(2025, month - 1, day);
-
-                // Verifica se a corrida é hoje ou no futuro e se ainda não encontramos a próxima
-                if (raceDate >= today && !nextRaceFound) {
-                    option.textContent = `${race} (Próxima)`; // Adiciona um marcador visual
-                    option.selected = true; // Pre-seleciona esta opção
-                    nextRaceFound = true; // Seta a flag para não marcar as outras
-                }
-
-                raceSelector.appendChild(option);
-            });
-        };
-        // SUBSTITUA ESTA FUNÇÃO INTEIRA PELA VERSÃO CORRIGIDA
-        const renderRaceTable = () => {
-            const selectedRace = raceSelector.value;
-            if (!selectedRace || state.drivers.length === 0) {
-                raceTableContainer.innerHTML = '<p class="text-muted">Adicione pilotos para inserir os resultados.</p>';
-                saveResultsBtn.style.display = 'none'; return;
-            }
-            saveResultsBtn.style.display = 'inline-block';
-
-            const createPositionSelect = (className, selectedValue) => {
-                let optionsHTML = '<option value="NP">N/P</option>';
-                for (let i = 1; i <= 22; i++) {
-                    const isSelected = i == selectedValue ? 'selected' : '';
-                    optionsHTML += `<option value="${i}" ${isSelected}>${i}º</option>`;
-                }
-                ['DNF', 'DSQ', 'DNS'].forEach(status => {
-                    const isSelected = status === selectedValue ? 'selected' : '';
-                    optionsHTML += `<option value="${status}" ${isSelected}>${status}</option>`;
-                });
-                return `<select class="form-select form-select-sm ${className}">${optionsHTML}</select>`;
-            };
-
-            let tableHTML = `<table class="table table-hover table-sm"><thead><tr><th class="text-start">Piloto</th><th>Qualifying</th><th>Pos. Sprint</th><th>FL (Sprint)</th><th>Pos. Feature</th><th>FL (Feature)</th></tr></thead><tbody>`;
-
-            state.drivers.forEach(driver => {
-                const savedResult = state.results[selectedRace]?.[driver] || {};
-
-                const qualifyingSelect = createPositionSelect('qualifying', savedResult.qualifying);
-                const sprintSelect = createPositionSelect('sprint', savedResult.sprint);
-                const featureSelect = createPositionSelect('feature', savedResult.feature);
-
-                tableHTML += `<tr data-driver="${driver}">
-                                <td class="text-start fw-bold">${driver}</td>
-                                <td>${qualifyingSelect}</td>
-                                <td>${sprintSelect}</td>
-                                <td><div class="form-check d-flex justify-content-center"><input type="checkbox" class="form-check-input sprintFL" ${savedResult.sprintFL ? 'checked' : ''}></div></td>
-                                <td>${featureSelect}</td>
-                                <td><div class="form-check d-flex justify-content-center"><input type="checkbox" class="form-check-input featureFL" ${savedResult.featureFL ? 'checked' : ''}></div></td>
-                              </tr>`;
-            });
-
-            raceTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-        };
-        const renderStandingsTable = () => {
-            if (state.drivers.length === 0) { standingsTableContainer.innerHTML = '<p class="text-muted">Nenhum piloto no campeonato.</p>'; return; }
-            let tableHTML = `<table class="table table-hover"><thead><tr><th class="text-start">Piloto</th>`;
-            races.forEach(race => { tableHTML += `<th class="race-header-clickable" style="cursor: pointer;" data-race-name="${race}">${race.split('–')[1].split('(')[0].trim()}</th>`; });
-            tableHTML += `<th>TOTAL</th></tr></thead><tbody>`;
-
-            const sortedDrivers = [...state.drivers].sort((a, b) => {
-                const pointsA = races.reduce((sum, race) => sum + calculatePointsForRace(a, race), 0);
-                const pointsB = races.reduce((sum, race) => sum + calculatePointsForRace(b, race), 0);
-                return pointsB - pointsA;
-            });
-
-            sortedDrivers.forEach(driver => {
-                let totalPoints = 0;
-                tableHTML += `<tr><td class="text-start fw-bold driver-name-clickable" style="cursor: pointer;" data-driver-name="${driver}">${driver}</td>`;
-                races.forEach(race => {
-                    const points = calculatePointsForRace(driver, race);
-                    totalPoints += points;
-                    tableHTML += `<td>${points || '-'}</td>`;
-                });
-                tableHTML += `<td class="fw-bold">${totalPoints}</td></tr>`;
-            });
-            standingsTableContainer.innerHTML = tableHTML + `</tbody></table>`;
-        };
-
-        const updateAll = () => {
-            renderDriverList();
-            renderRaceSelector();
-            renderStandingsTable();
-            renderRaceTable();
-            renderChampionshipChart(); 
-        };
-
-        // --- EVENT LISTENERS ---
-        addDriverBtn.addEventListener('click', () => {
-            const name = driverNameInput.value.trim();
-            if (name && !state.drivers.includes(name)) {
-                state.drivers.push(name);
-                driverNameInput.value = '';
-                saveData();
-            } else if (state.drivers.includes(name)) {
-                alert('Este piloto já existe.');
-            }
-        });
-        driverList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-driver-btn')) {
-                const driverNameToDelete = e.target.dataset.driverName;
-                state.drivers = state.drivers.filter(d => d !== driverNameToDelete);
-                saveData();
-            }
-        });
-        resetChampionshipBtn.addEventListener('click', async () => {
-            if (confirm('Tem certeza que deseja apagar TODOS os pilotos e resultados da NUVEM?')) {
-                state.drivers = [];
-                state.results = {};
-                await saveData();
-            }
-        });
-        raceSelector.addEventListener('change', renderRaceTable);
-        saveResultsBtn.addEventListener('click', async () => {
-            saveResultsBtn.disabled = true;
-            saveResultsBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...`;
-
-            const selectedRace = raceSelector.value;
-            if (!state.results[selectedRace]) state.results[selectedRace] = {};
-
-            raceTableContainer.querySelectorAll('tbody tr').forEach(row => {
-                const driver = row.dataset.driver;
-                // A lógica de salvar agora é mais direta, apenas pega o valor do select
-                state.results[selectedRace][driver] = {
-                    qualifying: row.querySelector('.qualifying').value,
-                    sprint: row.querySelector('.sprint').value,
-                    sprintFL: row.querySelector('.sprintFL').checked,
-                    feature: row.querySelector('.feature').value,
-                    featureFL: row.querySelector('.featureFL').checked,
-                };
-            });
-
-            try {
-                await saveData();
-                saveResultsBtn.innerHTML = `<i class="fas fa-check me-2"></i>Salvo!`;
-                setTimeout(() => {
-                    saveResultsBtn.disabled = false;
-                    saveResultsBtn.innerHTML = `<i class="fas fa-save me-2"></i>Salvar Resultados`;
-                }, 2000);
-            } catch (error) {
-                saveResultsBtn.disabled = false;
-                saveResultsBtn.innerHTML = `<i class="fas fa-save me-2"></i>Salvar Resultados`;
-            }
-        });
-
-        standingsTableContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('driver-name-clickable')) {
-                const driverName = e.target.dataset.driverName;
-                showDriverStats(driverName);
-            }
-        });
-
-        const raceHubModal = new bootstrap.Modal(document.getElementById('raceHubModal'));
-
-        function openRaceHub(raceName) {
-            const raceResults = state.results[raceName];
-            const modalTitle = document.getElementById('raceHubModalLabel');
-            const modalBody = document.getElementById('raceHubModalBody');
-
-            modalTitle.textContent = `Central da Corrida: ${raceName.split('–')[1].trim()}`;
-
-            if (!raceResults || Object.keys(raceResults).length === 0) {
-                modalBody.innerHTML = '<p class="text-center text-muted">Resultados para esta corrida ainda não foram inseridos.</p>';
-                raceHubModal.show();
-                return;
-            }
-
-            // --- PASSO 1: Preparação de Dados e Cálculo dos Prêmios ---
-            let allDriversResults = [];
-            let bestRecovery = { name: 'N/A', positionsGained: -Infinity };
-            let perfectWeekendWinner = null;
-            let mrSaturday = null;
-
-            state.drivers.forEach(driver => {
-                const result = raceResults[driver] || {};
-                allDriversResults.push({ name: driver, result: result });
-
-                const qualiPos = parseInt(result.qualifying, 10);
-                const featurePos = parseInt(result.feature, 10);
-
-                if (!isNaN(qualiPos) && !isNaN(featurePos) && qualiPos > 0 && featurePos > 0) {
-                    const positionsGained = qualiPos - featurePos;
-                    if (positionsGained > bestRecovery.positionsGained) {
-                        bestRecovery = { name: driver, positionsGained: positionsGained };
-                    }
-                }
-
-                if (!isNaN(qualiPos) && qualiPos === 1) {
-                    mrSaturday = driver;
-                }
-            });
-
-            const featureWinnerData = allDriversResults.find(d => parseInt(d.result.feature, 10) === 1);
-            if (featureWinnerData && featureWinnerData.name === mrSaturday && featureWinnerData.result.featureFL) {
-                perfectWeekendWinner = featureWinnerData.name;
-            }
-
-            // --- PASSO 2: Geração do HTML ---
-
-            let awardsHTML = '<div class="race-session"><h4><i class="fas fa-trophy me-2"></i>Hall da Fama da Etapa</h4>';
-            let hasAwards = false;
-
-            if (perfectWeekendWinner) {
-                hasAwards = true;
-                awardsHTML += `<div class="award-box-special"><h5 class="mb-0">⭐ Prêmio Domínio Total</h5><p class="fs-4 mb-0">${perfectWeekendWinner}</p><p class="lead fw-bold">Pole, Vitória e Volta Mais Rápida!</p></div>`;
-            }
-            if (mrSaturday) {
-                hasAwards = true;
-                awardsHTML += `<div class="award-box mt-3"><h5 class="mb-0">⏱️ Prêmio Mr. Saturday (Rei da Qualificação)</h5><p class="fs-4 mb-0">${mrSaturday}</p></div>`;
-            }
-            if (bestRecovery.positionsGained > 0) {
-                hasAwards = true;
-                awardsHTML += `<div class="award-box mt-3"><h5 class="mb-0">🏆 Prêmio Corrida de Recuperação</h5><p class="fs-4 mb-0">${bestRecovery.name}</p><p class="lead fw-bold text-success">+${bestRecovery.positionsGained} posições!</p></div>`;
-            }
-            if (!hasAwards) {
-                awardsHTML += '<p class="text-muted small">Nenhum prêmio especial concedido nesta etapa.</p>';
-            }
-            awardsHTML += '</div>';
-
-            let qualifyingHTML = '<div class="race-session"><h5><i class="fas fa-stopwatch me-2"></i>Qualificação</h5>';
-            let qualifyingResults = allDriversResults.filter(d => d.result && parseInt(d.result.qualifying) > 0).sort((a, b) => parseInt(a.result.qualifying) - parseInt(b.result.qualifying));
-            if (qualifyingResults.length > 0) {
-                qualifyingHTML += '<ul class="list-group list-group-flush">';
-                qualifyingResults.slice(0, 5).forEach(d => {
-                    qualifyingHTML += `<li class="list-group-item d-flex justify-content-between"><span>${d.result.qualifying}º - ${d.name}</span></li>`;
-                });
-                qualifyingHTML += '</ul>';
-            } else {
-                qualifyingHTML += '<p class="text-muted small">Resultados da qualificação não inseridos.</p>';
-            }
-            qualifyingHTML += '</div>';
-
-            let featureRaceHTML = '<div class="race-session"><h5><i class="fas fa-flag-checkered me-2"></i>Corrida Principal (Feature Race)</h5>';
-            let featureResults = [...allDriversResults].sort((a, b) => {
-                const posA = parseInt(a.result.feature, 10); const posB = parseInt(b.result.feature, 10);
-                const aIsNum = !isNaN(posA); const bIsNum = !isNaN(posB);
-                if (aIsNum && bIsNum) return posA - posB; if (aIsNum) return -1; if (bIsNum) return 1;
-                return (a.result.feature || '').localeCompare(b.result.feature || '');
-            });
-            if (featureResults.some(d => d.result && d.result.feature)) {
-                featureRaceHTML += '<table class="table table-sm"><thead><tr><th>Pos.</th><th class="text-start">Piloto</th><th>Largada</th><th>+/-</th></tr></thead><tbody>';
-                featureResults.forEach(d => {
-                    let positionChangeHTML = '<span class="text-muted">-</span>';
-                    const startPos = parseInt(d.result.qualifying, 10); const endPos = parseInt(d.result.feature, 10);
-                    if (!isNaN(startPos) && !isNaN(endPos)) {
-                        const change = startPos - endPos;
-                        if (change > 0) positionChangeHTML = `<span class="text-success fw-bold">+${change}</span>`;
-                        if (change < 0) positionChangeHTML = `<span class="text-danger">${change}</span>`;
-                        if (change === 0) positionChangeHTML = `<span>=</span>`;
-                    }
-                    featureRaceHTML += `<tr><td><strong>${d.result.feature || 'N/P'}</strong></td><td class="text-start">${d.name}</td><td>${d.result.qualifying || 'N/P'}</td><td>${positionChangeHTML}</td></tr>`;
-                });
-                featureRaceHTML += '</tbody></table>';
-            } else {
-                featureRaceHTML += '<p class="text-muted small">Resultados da corrida principal não inseridos.</p>';
-            }
-            featureRaceHTML += '</div>';
-
-            let sprintRaceHTML = '<div class="race-session"><h5><i class="fas fa-fast-forward me-2"></i>Corrida Sprint</h5>';
-            let sprintResults = [...allDriversResults].sort((a, b) => {
-                const posA = parseInt(a.result.sprint, 10); const posB = parseInt(b.result.sprint, 10);
-                const aIsNum = !isNaN(posA); const bIsNum = !isNaN(posB);
-                if (aIsNum && bIsNum) return posA - posB; if (aIsNum) return -1; if (bIsNum) return 1;
-                return (a.result.sprint || '').localeCompare(b.result.sprint || '');
-            });
-            if (sprintResults.some(d => d.result && d.result.sprint)) {
-                sprintRaceHTML += '<table class="table table-sm"><thead><tr><th>Pos.</th><th class="text-start">Piloto</th></tr></thead><tbody>';
-                sprintResults.forEach(d => {
-                    const sprintPos = parseInt(d.result.sprint);
-                    if (d.result.sprint && (sprintPos > 0 || isNaN(sprintPos))) {
-                        sprintRaceHTML += `<tr><td><strong>${d.result.sprint}</strong></td><td class="text-start">${d.name}</td></tr>`;
-                    }
-                });
-                sprintRaceHTML += '</tbody></table>';
-            } else {
-                sprintRaceHTML += '<p class="text-muted small">Resultados da corrida sprint não inseridos.</p>';
-            }
-            sprintRaceHTML += '</div>';
-
-            modalBody.innerHTML = awardsHTML + qualifyingHTML + featureRaceHTML + sprintRaceHTML;
-            raceHubModal.show();
-        }
-
-        let championshipChartInstance = null; // Variável para guardar a instância do gráfico
-
-        // SUBSTITUA ESTA FUNÇÃO INTEIRA PELA VERSÃO CORRIGIDA
-        const renderChampionshipChart = () => {
-            const canvas = document.getElementById('championshipChart');
-            if (!canvas) return;
-
-            // Destrói o gráfico anterior se ele existir para evitar bugs
-            if (championshipChartInstance) {
-                championshipChartInstance.destroy();
-            }
-
-            // --- PASSO 1: Encontra o índice da última corrida com resultados ---
-            let lastRaceIndex = -1;
-            races.forEach((race, index) => {
-                // Verifica se existe algum resultado salvo para esta corrida
-                if (state.results[race] && Object.keys(state.results[race]).length > 0) {
-                    lastRaceIndex = index;
-                }
-            });
-
-            // Se nenhuma corrida foi preenchida ainda, simplesmente limpa o canvas e não desenha nada.
-            if (lastRaceIndex === -1) {
-                const context = canvas.getContext('2d');
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                // (Opcional) Poderíamos adicionar uma mensagem de "Aguardando primeiros resultados..."
-                return;
-            }
-
-            // --- PASSO 2: "Corta" os dados para incluir apenas até a última corrida preenchida ---
-            const activeRaces = races.slice(0, lastRaceIndex + 1);
-            const raceLabels = activeRaces.map(race => race.split('–')[1].split('(')[0].trim());
-
-            // --- PASSO 3: Preparação dos Dados (agora usando 'activeRaces') ---
-            const driverPointsPerRace = {};
-            state.drivers.forEach(driver => {
-                let cumulativePoints = 0;
-                // O map agora é feito apenas no array das corridas ativas
-                driverPointsPerRace[driver] = activeRaces.map(race => {
-                    cumulativePoints += calculatePointsForRace(driver, race);
-                    return cumulativePoints;
-                });
-            });
-
-            const sortedDrivers = Object.keys(driverPointsPerRace).sort((a, b) => {
-                const totalA = driverPointsPerRace[a][driverPointsPerRace[a].length - 1];
-                const totalB = driverPointsPerRace[b][driverPointsPerRace[b].length - 1];
-                return totalB - totalA;
-            });
-            
-            const top5Drivers = sortedDrivers.slice(0, 10);
-
-            const datasets = top5Drivers.map((driverName, index) => {
-                const colors = ['#0d6efd', '#dc3545', '#ffc107', '#198754', '#adb5bd', '#993399', '#ff5c00', '#ff007f', '#00ffff', '#adff2f'];
-                return {
-                    label: driverName,
-                    data: driverPointsPerRace[driverName],
-                    borderColor: colors[index % colors.length],
-                    backgroundColor: colors[index % colors.length] + '33',
-                    fill: false,
-                    tension: 0.1
-                };
-            });
-
-            // --- PASSO 4: Renderização do Gráfico ---
-            championshipChartInstance = new Chart(canvas, {
-                type: 'line',
-                data: {
-                    labels: raceLabels,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'Pontuação Cumulativa por Etapa' }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        };
-
-        standingsTableContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('driver-name-clickable')) {
-                const driverName = e.target.dataset.driverName;
-                showDriverStats(driverName);
-            }
-            // Nova lógica para os cabeçalhos das corridas
-            if (e.target.classList.contains('race-header-clickable')) {
-                const raceName = e.target.dataset.raceName;
-                openRaceHub(raceName);
-            }
-        });
-
-        renderRaceSelector();
-    </script>
-</body>
-
-<div class="modal fade" id="raceHubModal" tabindex="-1" aria-labelledby="raceHubModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="raceHubModalLabel">Detalhes da Corrida</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="raceHubModalBody">
-                <p>Carregando detalhes da corrida...</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+    <!-- Race Hub Modal -->
+    <div class="modal fade" id="race-hub-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="race-hub-title">Race Hub</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="race-hub-content">
+                    <!-- Race hub content will be populated here -->
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Driver Stats Modal -->
+    <div class="modal fade" id="driver-stats-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="driver-stats-title">Driver Statistics</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="driver-stats-content">
+                    <!-- Driver stats content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
 </html>
